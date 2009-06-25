@@ -46,7 +46,8 @@ module Technoweenie # :nodoc:
       # *  <tt>:max_size</tt> - Maximum size allowed.  1.megabyte is the default.
       # *  <tt>:size</tt> - Range of sizes allowed.  (1..1.megabyte) is the default.  This overrides the :min_size and :max_size options.
       # *  <tt>:resize_to</tt> - Used by RMagick to resize images.  Pass either an array of width/height, or a geometry string.
-      # *  <tt>:thumbnails</tt> - Specifies a set of thumbnails to generate.  This accepts a hash of filename suffixes and RMagick resizing options.
+      # *  <tt>:thumbnails</tt> - Specifies a set of thumbnails to generate.
+      #      This accepts a hash of filename suffixes and RMagick resizing options, or a Proc which returns a hash so resizing can be modified at runtime.
       # *  <tt>:thumbnail_class</tt> - Set what class to use for thumbnails.  This attachment class is used by default.
       # *  <tt>:path_prefix</tt> - path to store the uploaded files.  Uses public/#{table_name} by default for the filesystem, and just #{table_name}
       #      for the S3 backend.  Setting this sets the :storage to :file_system.
@@ -85,8 +86,8 @@ module Technoweenie # :nodoc:
         options[:cloudfront]       ||= false
         options[:content_type] = [options[:content_type]].flatten.collect! { |t| t == :image ? Technoweenie::AttachmentFu.content_types : t }.flatten unless options[:content_type].nil?
 
-        unless options[:thumbnails].is_a?(Hash)
-          raise ArgumentError, ":thumbnails option should be a hash: e.g. :thumbnails => { :foo => '50x50' }"
+        unless options[:thumbnails].is_a?(Hash) || options[:thumbnails].is_a?(Proc)
+          raise ArgumentError, ":thumbnails option should be a hash or a proc: e.g. :thumbnails => { :foo => '50x50' } or :thumbnails => Proc.new {|self| self.thumbnail_hash }"
         end
 
         extend ClassMethods unless (class << self; included_modules; end).include?(ClassMethods)
@@ -453,7 +454,8 @@ module Technoweenie # :nodoc:
           if @saved_attachment
             if respond_to?(:process_attachment_with_processing) && thumbnailable? && !attachment_options[:thumbnails].blank? && parent_id.nil?
               temp_file = temp_path || create_temp_file
-              attachment_options[:thumbnails].each { |suffix, size| create_or_update_thumbnail(temp_file, suffix, *size) }
+              thumbnails = attachment_options[:thumbnails].is_a?(Proc) ? thumbhash.call(self) : attachment_options[:thumbnails]
+              thumbnails.each { |suffix, size| create_or_update_thumbnail(temp_file, suffix, *size) }
             end
             save_to_storage
             @temp_paths.clear
