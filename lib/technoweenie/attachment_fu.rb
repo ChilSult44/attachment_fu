@@ -117,7 +117,7 @@ module Technoweenie # :nodoc:
         end
         with_options(association_options) do |m|
           m.has_many   :thumbnails, :class_name => "::#{attachment_options[:thumbnail_class]}"
-          m.belongs_to :parent, :class_name => "::#{base_class}" unless options[:thumbnails].empty?
+          m.belongs_to :parent, :class_name => "::#{base_class}" unless options[:thumbnails].is_a?(Proc) || options[:thumbnails].empty?
         end
 
         storage_mod = Technoweenie::AttachmentFu::Backends.const_get("#{options[:storage].to_s.classify}Backend")
@@ -454,7 +454,7 @@ module Technoweenie # :nodoc:
           if @saved_attachment
             if respond_to?(:process_attachment_with_processing) && thumbnailable? && !attachment_options[:thumbnails].blank? && parent_id.nil?
               temp_file = temp_path || create_temp_file
-              thumbnails = attachment_options[:thumbnails].is_a?(Proc) ? thumbhash.call(self) : attachment_options[:thumbnails]
+              thumbnails = attachment_options[:thumbnails].is_a?(Proc) ? attachment_options[:thumbnails].call(self) : attachment_options[:thumbnails]
               thumbnails.each { |suffix, size| create_or_update_thumbnail(temp_file, suffix, *size) }
             end
             save_to_storage
