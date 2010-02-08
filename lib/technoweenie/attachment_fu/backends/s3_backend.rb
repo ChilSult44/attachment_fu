@@ -355,7 +355,7 @@ module Technoweenie # :nodoc:
         protected
           # Called in the after_destroy callback
           def destroy_file
-            S3Object.delete full_filename, bucket_name
+            #S3Object.delete full_filename, bucket_name
           end
 
           def rename_file
