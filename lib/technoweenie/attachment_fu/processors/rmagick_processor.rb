@@ -39,7 +39,9 @@ module Technoweenie # :nodoc:
         # Performs the actual resizing operation for a thumbnail
         def resize_image(img, size)
           size = size.first if size.is_a?(Array) && size.length == 1 && !size.first.is_a?(Fixnum)
-          if size.is_a?(Fixnum) || (size.is_a?(Array) && size.first.is_a?(Fixnum))
+          if size.is_a?(String) && size =~ /^crop: (\d*)x(\d*)/i
+            img.crop_resized!($1.to_i, $2.to_i)
+          elsif size.is_a?(Fixnum) || (size.is_a?(Array) && size.first.is_a?(Fixnum))
             size = [size, size] if size.is_a?(Fixnum)
             img.thumbnail!(*size)
           elsif size.is_a?(String) && size =~ /^c.*$/ # Image cropping - example geometry string: c75x75
