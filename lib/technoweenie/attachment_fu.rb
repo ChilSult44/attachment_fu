@@ -362,6 +362,11 @@ module Technoweenie # :nodoc:
         p = temp_paths.first
         p.respond_to?(:path) ? p.path : p.to_s
       end
+      
+      def temp_path=(value)
+        temp_paths.unshift value
+        temp_path
+      end
 
       # Gets an array of the currently used temp paths.  Defaults to a copy of #full_filename.
       def temp_paths
