@@ -33,7 +33,29 @@ module Technoweenie # :nodoc:
       'image/gi_',
       'image/x-citrix-pjpeg'
     ]
-    mattr_reader :content_types, :tempfile_path, :default_processors
+    @@video_content_types = [
+      'video/mpeg',
+      'video/x-mpeg',
+      'video/mpg',
+      'video/x-mpg',
+      'video/mp4',
+      'video/x-mp4',
+      'video/ogg',
+      'video/x-ogg',
+      'video/quicktime',
+      'video/x-quicktime',
+      'video/x-ms-wmv',
+      'video/x-la-asf',
+      'video/x-ms-asf',
+      'video/3gpp',
+      'video/x-3gpp',
+      'video/3gpp2',
+      'video/x-3gpp2',
+      'video/x-flv',
+      'application/x-flash-video',
+      'video/x-m4v'
+    ]
+    mattr_reader :content_types, :video_content_types, :tempfile_path, :default_processors
     mattr_writer :tempfile_path
 
     class ThumbnailError < StandardError;  end
@@ -84,7 +106,19 @@ module Technoweenie # :nodoc:
         options[:thumbnail_class]  ||= self
         options[:s3_access]        ||= :public_read
         options[:cloudfront]       ||= false
-        options[:content_type] = [options[:content_type]].flatten.collect! { |t| t == :image ? Technoweenie::AttachmentFu.content_types : t }.flatten unless options[:content_type].nil?
+        unless options[:content_type].nil?
+          Rails.logger.info "Content type is " + options[:content_type].to_s
+          options[:content_type] = [options[:content_type]].flatten.collect! do |t|
+            if t == :image
+              Technoweenie::AttachmentFu.content_types
+            elsif t == :video
+              Technoweenie::AttachmentFu.video_content_types
+            else
+              t.flatten
+            end
+          end
+          options[:content_type].flatten!
+        end
 
         unless options[:thumbnails].is_a?(Hash) || options[:thumbnails].is_a?(Proc)
           raise ArgumentError, ":thumbnails option should be a hash or a proc: e.g. :thumbnails => { :foo => '50x50' } or :thumbnails => Proc.new {|self| self.thumbnail_hash }"
@@ -165,6 +199,7 @@ module Technoweenie # :nodoc:
 
     module ClassMethods
       delegate :content_types, :to => Technoweenie::AttachmentFu
+      delegate :video_content_types, :to => Technoweenie::AttachmentFu
 
       # Performs common validations for attachment models.
       def validates_as_attachment
@@ -175,6 +210,10 @@ module Technoweenie # :nodoc:
       # Returns true or false if the given content type is recognized as an image.
       def image?(content_type)
         content_types.include?(content_type)
+      end
+
+      def video?(content_type)
+        video_content_types.include?(content_type)
       end
 
       def self.extended(base)
@@ -262,6 +301,10 @@ module Technoweenie # :nodoc:
       # Checks whether the attachment's content type is an image content type
       def image?
         self.class.image?(content_type)
+      end
+
+      def video?
+        self.class.video?(content_type)
       end
 
       # Returns true/false if an attachment is thumbnailable.  A thumbnailable attachment has an image content type and the parent_id attribute.
