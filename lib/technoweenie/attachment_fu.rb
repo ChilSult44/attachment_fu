@@ -107,14 +107,13 @@ module Technoweenie # :nodoc:
         options[:s3_access]        ||= :public_read
         options[:cloudfront]       ||= false
         unless options[:content_type].nil?
-          Rails.logger.info "Content type is " + options[:content_type].to_s
           options[:content_type] = [options[:content_type]].flatten.collect! do |t|
             if t == :image
               Technoweenie::AttachmentFu.content_types
             elsif t == :video
               Technoweenie::AttachmentFu.video_content_types
             else
-              t.flatten
+              t
             end
           end
           options[:content_type].flatten!
