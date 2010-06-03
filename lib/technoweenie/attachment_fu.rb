@@ -116,7 +116,7 @@ module Technoweenie # :nodoc:
               t
             end
           end
-          options[:content_type].flatten!
+          options[:content_type].flatten! 
         end
 
         unless options[:thumbnails].is_a?(Hash) || options[:thumbnails].is_a?(Proc)
