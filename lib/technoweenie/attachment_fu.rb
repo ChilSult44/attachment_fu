@@ -53,7 +53,8 @@ module Technoweenie # :nodoc:
       'video/x-3gpp2',
       'video/x-flv',
       'application/x-flash-video',
-      'video/x-m4v'
+      'video/x-m4v',
+      'application/octet-stream'
     ]
     mattr_reader :content_types, :video_content_types, :tempfile_path, :default_processors
     mattr_writer :tempfile_path
@@ -476,6 +477,7 @@ module Technoweenie # :nodoc:
         def attachment_attributes_valid?
           [:size, :content_type].each do |attr_name|
             enum = attachment_options[attr_name]
+            Rails.logger.info "#{attr_name.to_s} is #{send(attr_name)}"
             if Object.const_defined?(:I18n) # Rails >= 2.2
               errors.add attr_name, I18n.translate("activerecord.errors.messages.inclusion", attr_name => enum) unless enum.nil? || enum.include?(send(attr_name))
             else
