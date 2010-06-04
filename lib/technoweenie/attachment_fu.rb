@@ -54,7 +54,9 @@ module Technoweenie # :nodoc:
       'video/x-flv',
       'application/x-flash-video',
       'video/x-m4v',
-      'application/octet-stream'
+      'application/octet-stream',
+      'application/download',
+      'application/binary'
     ]
     mattr_reader :content_types, :video_content_types, :tempfile_path, :default_processors
     mattr_writer :tempfile_path
