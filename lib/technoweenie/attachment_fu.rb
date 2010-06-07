@@ -45,6 +45,8 @@ module Technoweenie # :nodoc:
       'video/quicktime',
       'video/x-quicktime',
       'video/x-ms-wmv',
+      'video/msvideo',
+      'video/x-msvideo',
       'video/x-la-asf',
       'video/x-ms-asf',
       'video/3gpp',
@@ -54,6 +56,7 @@ module Technoweenie # :nodoc:
       'video/x-flv',
       'application/x-flash-video',
       'video/x-m4v',
+      'video/avi',
       'application/octet-stream',
       'application/download',
       'application/binary'
