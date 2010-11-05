@@ -259,7 +259,9 @@ module Technoweenie # :nodoc:
         # The full path to the file relative to the bucket name
         # Example: <tt>:table_name/:id/:filename</tt>
         def full_filename(thumbnail = nil)
-          File.join(base_path, thumbnail_name_for(thumbnail))
+          thumb_name = thumbnail_name_for(thumbnail)
+          return nil if !thumb_name
+          File.join(base_path, thumb_name)
         end
 
         # All public objects are accessible via a GET request to the S3 servers. You can generate a
