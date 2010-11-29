@@ -16,7 +16,7 @@ module Intersect::ImageAttachments
 
       protected
       def save_attachments
-        if @attachment_replace
+        if @attachment_replace && @attachments && @attachments.size > 0
           images.destroy_all
         end
         
